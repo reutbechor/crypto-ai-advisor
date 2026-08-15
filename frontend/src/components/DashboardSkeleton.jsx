@@ -9,6 +9,12 @@ function DashboardSkeleton() {
           <div className="skeleton-market-card" key={item} />
         ))}
       </div>
+      <div className="skeleton-heading skeleton-heading--news" />
+      <div className="news-grid">
+        {[1, 2].map((item) => (
+          <div className="skeleton-news-card" key={item} />
+        ))}
+      </div>
     </div>
   )
 }

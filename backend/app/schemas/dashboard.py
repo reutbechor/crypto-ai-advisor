@@ -21,8 +21,20 @@ class MarketCoinResponse(BaseModel):
     last_updated: datetime | None = None
 
 
+class NewsItemResponse(BaseModel):
+    id: str
+    title: str
+    summary: str
+    source: str
+    published_at: datetime
+    related_assets: list[str]
+    url: str | None = None
+
+
 class DashboardResponse(BaseModel):
     user: DashboardUserResponse
     preferences: PreferenceResponse
     market: list[MarketCoinResponse]
     market_status: Literal["available", "unavailable"]
+    news: list[NewsItemResponse]
+    news_status: Literal["fallback", "unavailable"]

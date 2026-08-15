@@ -10,6 +10,7 @@ from app.schemas.dashboard import (
 )
 from app.schemas.onboarding import PreferenceResponse
 from app.services.market import fetch_market_data
+from app.services.news import select_personalized_news
 from app.services.onboarding import get_user_preferences
 
 
@@ -29,10 +30,13 @@ def read_dashboard(
         )
 
     market, market_status = fetch_market_data(preferences.crypto_assets)
+    news, news_status = select_personalized_news(preferences.crypto_assets)
 
     return DashboardResponse(
         user=DashboardUserResponse(id=current_user.id, name=current_user.name),
         preferences=PreferenceResponse.model_validate(preferences),
         market=market,
         market_status=market_status,
+        news=news,
+        news_status=news_status,
     )

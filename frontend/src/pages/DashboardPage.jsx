@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import Brand from '../components/Brand.jsx'
 import DashboardSkeleton from '../components/DashboardSkeleton.jsx'
 import MarketCard from '../components/MarketCard.jsx'
+import NewsCard from '../components/NewsCard.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { ApiError } from '../services/apiClient.js'
 import { getDashboard } from '../services/dashboardApi.js'
@@ -118,7 +119,6 @@ function DashboardPage() {
             <section className="dashboard-market" aria-labelledby="market-title">
               <header className="dashboard-section-heading">
                 <div>
-                  <p className="section-index">01 / Market</p>
                   <h2 id="market-title">Your Market</h2>
                   <p>Live prices for the assets you follow.</p>
                 </div>
@@ -141,6 +141,29 @@ function DashboardPage() {
                 <div className="market-grid">
                   {dashboard.market.map((coin) => (
                     <MarketCard coin={coin} key={coin.id} />
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="dashboard-news" aria-labelledby="news-title">
+              <header className="dashboard-section-heading">
+                <div>
+                  <h2 id="news-title">Market News</h2>
+                  <p>Updates matched to the assets you follow.</p>
+                </div>
+                <span className="brief-label">Curated Market Briefs</span>
+              </header>
+
+              {dashboard.news_status === 'unavailable' || dashboard.news.length === 0 ? (
+                <div className="news-unavailable" role="status">
+                  <h3>News is temporarily unavailable.</h3>
+                  <p>Your market data and saved preferences are still available.</p>
+                </div>
+              ) : (
+                <div className="news-grid">
+                  {dashboard.news.map((item) => (
+                    <NewsCard item={item} key={item.id} />
                   ))}
                 </div>
               )}
