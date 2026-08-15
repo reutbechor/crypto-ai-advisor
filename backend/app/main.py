@@ -1,13 +1,35 @@
+import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.api.routes.health import router as health_router
+from app.db.base import Base
+from app.db.session import engine
+from app.models.user import User  # Registers the users table with Base metadata.
+
+
+logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(_: FastAPI) -> AsyncIterator[None]:
+    try:
+        Base.metadata.create_all(bind=engine)
+    except SQLAlchemyError:
+        logger.exception("Database table initialization failed.")
+
+    yield
 
 
 app = FastAPI(
     title="CoinSight AI API",
     description="Backend API for the AI Crypto Advisor application",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 app.add_middleware(
