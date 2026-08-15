@@ -1,4 +1,5 @@
 import { Route, Routes } from 'react-router-dom'
+import IncompleteOnboardingRoute from './components/IncompleteOnboardingRoute.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import PublicOnlyRoute from './components/PublicOnlyRoute.jsx'
 import DashboardPage from './pages/DashboardPage.jsx'
@@ -19,7 +20,9 @@ function App() {
       </Route>
 
       <Route element={<ProtectedRoute />}>
-        <Route path="/onboarding" element={<OnboardingPage />} />
+        <Route element={<IncompleteOnboardingRoute />}>
+          <Route path="/onboarding" element={<OnboardingPage />} />
+        </Route>
         <Route path="/dashboard" element={<DashboardPage />} />
       </Route>
     </Routes>

@@ -8,7 +8,7 @@ function DashboardPage() {
     <AuthenticatedPlaceholder
       eyebrow="Your workspace"
       title={`Welcome, ${user.name}`}
-      description="Your personalized dashboard is coming next."
+      description="Your onboarding is complete. Your personalized dashboard is coming next."
     />
   )
 }
