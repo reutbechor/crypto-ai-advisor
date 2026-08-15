@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout.jsx'
 import FormField from '../components/FormField.jsx'
+import { ApiError, signupUser } from '../services/authApi.js'
 
 const initialValues = {
   fullName: '',
@@ -13,9 +14,21 @@ const initialValues = {
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function SignupPage() {
+  const navigate = useNavigate()
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
+  const [apiError, setApiError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
+
+  useEffect(() => {
+    if (!isSuccess) {
+      return undefined
+    }
+
+    const redirectTimer = window.setTimeout(() => navigate('/login'), 1000)
+    return () => window.clearTimeout(redirectTimer)
+  }, [isSuccess, navigate])
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -26,6 +39,7 @@ function SignupPage() {
       [name]: undefined,
       ...(name === 'password' ? { confirmPassword: undefined } : {}),
     }))
+    setApiError('')
     setIsSuccess(false)
   }
 
@@ -57,12 +71,36 @@ function SignupPage() {
     return nextErrors
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const nextErrors = validate()
     setErrors(nextErrors)
-    setIsSuccess(Object.keys(nextErrors).length === 0)
+    setApiError('')
+    setIsSuccess(false)
+
+    if (Object.keys(nextErrors).length > 0) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      await signupUser({
+        name: values.fullName.trim(),
+        email: values.email.trim(),
+        password: values.password,
+      })
+      setIsSuccess(true)
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setApiError('An account with this email already exists.')
+      } else {
+        setApiError('Unable to create your account. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -111,12 +149,22 @@ function SignupPage() {
 
         {isSuccess && (
           <p className="form-success" role="status">
-            Your details look good. Account creation will be connected later.
+            Profile created successfully. Redirecting to sign in...
           </p>
         )}
 
-        <button className="button button--primary auth-submit" type="submit">
-          Create Profile
+        {apiError && (
+          <p className="form-api-error" role="alert">
+            {apiError}
+          </p>
+        )}
+
+        <button
+          className="button button--primary auth-submit"
+          type="submit"
+          disabled={isSubmitting || isSuccess}
+        >
+          {isSubmitting ? 'Creating profile...' : 'Create Profile'}
         </button>
       </form>
 
