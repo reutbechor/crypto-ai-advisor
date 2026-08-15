@@ -67,9 +67,10 @@ function SignupPage() {
 
   return (
     <AuthLayout
-      title="Create your account"
-      description="Start building a crypto experience shaped around you."
+      titleLines={['Create', 'Profile']}
+      description="Set up your profile for insights shaped around you."
       titleId="signup-title"
+      formLabel="Profile details"
     >
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <FormField
@@ -115,7 +116,7 @@ function SignupPage() {
         )}
 
         <button className="button button--primary auth-submit" type="submit">
-          Create Account
+          Create Profile
         </button>
       </form>
 

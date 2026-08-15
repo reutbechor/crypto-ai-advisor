@@ -45,9 +45,10 @@ function LoginPage() {
 
   return (
     <AuthLayout
-      title="Welcome back"
-      description="Sign in to continue to CoinSight AI."
+      titleLines={['Welcome', 'Back']}
+      description="Sign in to continue to your personalized crypto experience."
       titleId="login-title"
+      formLabel="Account access"
     >
       <form className="auth-form" onSubmit={handleSubmit} noValidate>
         <FormField
