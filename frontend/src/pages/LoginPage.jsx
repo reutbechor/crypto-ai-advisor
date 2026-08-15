@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout.jsx'
 import FormField from '../components/FormField.jsx'
+import useAuth from '../hooks/useAuth.js'
+import { ApiError } from '../services/authApi.js'
 
 const initialValues = {
   email: '',
@@ -9,16 +11,19 @@ const initialValues = {
 }
 
 function LoginPage() {
+  const navigate = useNavigate()
+  const { login } = useAuth()
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
-  const [isSuccess, setIsSuccess] = useState(false)
+  const [apiError, setApiError] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   function handleChange(event) {
     const { name, value } = event.target
 
     setValues((currentValues) => ({ ...currentValues, [name]: value }))
     setErrors((currentErrors) => ({ ...currentErrors, [name]: undefined }))
-    setIsSuccess(false)
+    setApiError('')
   }
 
   function validate() {
@@ -35,12 +40,35 @@ function LoginPage() {
     return nextErrors
   }
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const nextErrors = validate()
     setErrors(nextErrors)
-    setIsSuccess(Object.keys(nextErrors).length === 0)
+    setApiError('')
+
+    if (Object.keys(nextErrors).length > 0) {
+      return
+    }
+
+    setIsSubmitting(true)
+
+    try {
+      const user = await login({
+        email: values.email.trim(),
+        password: values.password,
+      })
+      const destination = user.onboarding_completed ? '/dashboard' : '/onboarding'
+      navigate(destination, { replace: true })
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 401) {
+        setApiError('Invalid email or password.')
+      } else {
+        setApiError('Unable to sign in. Please try again.')
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -70,14 +98,18 @@ function LoginPage() {
           autoComplete="current-password"
         />
 
-        {isSuccess && (
-          <p className="form-success" role="status">
-            Your details look good. Sign-in will be connected later.
+        {apiError && (
+          <p className="form-api-error" role="alert">
+            {apiError}
           </p>
         )}
 
-        <button className="button button--primary auth-submit" type="submit">
-          Sign In
+        <button
+          className="button button--primary auth-submit"
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? 'Signing in...' : 'Sign In'}
         </button>
       </form>
 

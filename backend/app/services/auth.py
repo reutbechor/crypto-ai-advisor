@@ -2,9 +2,9 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from app.core.security import hash_password
+from app.core.security import hash_password, verify_password
 from app.models.user import User
-from app.schemas.auth import SignupRequest
+from app.schemas.auth import LoginRequest, SignupRequest
 
 
 class EmailAlreadyExistsError(Exception):
@@ -42,3 +42,12 @@ def create_user(db: Session, signup_data: SignupRequest) -> User:
     except SQLAlchemyError as exc:
         db.rollback()
         raise UserCreationError from exc
+
+
+def authenticate_user(db: Session, login_data: LoginRequest) -> User | None:
+    user = db.scalar(select(User).where(User.email == login_data.email))
+
+    if user is None or not verify_password(login_data.password, user.password_hash):
+        return None
+
+    return user

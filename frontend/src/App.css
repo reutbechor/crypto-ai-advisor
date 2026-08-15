@@ -1,5 +1,7 @@
 .welcome-page,
-.auth-page {
+.auth-page,
+.placeholder-page,
+.route-loading {
   width: 100%;
   color: var(--text);
   background: var(--background);
@@ -710,6 +712,63 @@
   text-underline-offset: 3px;
 }
 
+.route-loading {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.route-loading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.placeholder-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  padding: 20px;
+}
+
+.placeholder-shell {
+  width: min(100%, 1440px);
+  min-height: calc(100vh - 40px);
+  min-height: calc(100svh - 40px);
+  display: grid;
+  grid-template-rows: 72px minmax(0, 1fr);
+  margin: 0 auto;
+}
+
+.placeholder-content {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(56px, 8vw, 112px) 4px;
+}
+
+.placeholder-content h1 {
+  margin: 0;
+  font-size: clamp(48px, 7vw, 92px);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  line-height: 0.95;
+}
+
+.placeholder-content > p:not(.eyebrow) {
+  margin: 28px 0 32px;
+  color: var(--muted);
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.55;
+}
+
+.placeholder-content .button {
+  min-width: 140px;
+}
+
 @media (max-width: 960px) {
   .welcome-page {
     height: auto;
@@ -766,7 +825,8 @@
 
 @media (max-width: 600px) {
   .welcome-page,
-  .auth-page {
+  .auth-page,
+  .placeholder-page {
     padding: 14px;
   }
 
@@ -924,6 +984,14 @@
   .auth-form {
     gap: 17px;
     margin-top: 22px;
+  }
+
+  .placeholder-shell {
+    min-height: calc(100svh - 28px);
+  }
+
+  .placeholder-content h1 {
+    font-size: clamp(42px, 13vw, 62px);
   }
 }
 

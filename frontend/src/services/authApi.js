@@ -10,16 +10,17 @@ export class ApiError extends Error {
   }
 }
 
-export async function signupUser(userData) {
+async function request(path, options = {}) {
   let response
+  const { headers, ...fetchOptions } = options
 
   try {
-    response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-      method: 'POST',
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...fetchOptions,
       headers: {
         'Content-Type': 'application/json',
+        ...headers,
       },
-      body: JSON.stringify(userData),
     })
   } catch {
     throw new ApiError('Unable to reach the server.', 0)
@@ -28,8 +29,34 @@ export async function signupUser(userData) {
   const responseBody = await response.json().catch(() => null)
 
   if (!response.ok) {
-    throw new ApiError(responseBody?.detail || 'Request failed.', response.status)
+    const message =
+      typeof responseBody?.detail === 'string'
+        ? responseBody.detail
+        : 'Request failed.'
+    throw new ApiError(message, response.status)
   }
 
   return responseBody
+}
+
+export function signupUser(userData) {
+  return request('/api/auth/signup', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  })
+}
+
+export function loginUser(credentials) {
+  return request('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  })
+}
+
+export function getCurrentUser(token) {
+  return request('/api/auth/me', {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
 }
