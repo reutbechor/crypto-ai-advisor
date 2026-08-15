@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import AuthLayout from '../components/AuthLayout.jsx'
 import FormField from '../components/FormField.jsx'
+import useAuth from '../hooks/useAuth.js'
 import { ApiError, signupUser } from '../services/authApi.js'
 
 const initialValues = {
@@ -15,20 +16,12 @@ const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 function SignupPage() {
   const navigate = useNavigate()
+  const { login } = useAuth()
   const [values, setValues] = useState(initialValues)
   const [errors, setErrors] = useState({})
   const [apiError, setApiError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
-
-  useEffect(() => {
-    if (!isSuccess) {
-      return undefined
-    }
-
-    const redirectTimer = window.setTimeout(() => navigate('/login'), 1000)
-    return () => window.clearTimeout(redirectTimer)
-  }, [isSuccess, navigate])
 
   function handleChange(event) {
     const { name, value } = event.target
@@ -84,6 +77,7 @@ function SignupPage() {
     }
 
     setIsSubmitting(true)
+    let accountCreated = false
 
     try {
       await signupUser({
@@ -91,8 +85,25 @@ function SignupPage() {
         email: values.email.trim(),
         password: values.password,
       })
+      accountCreated = true
       setIsSuccess(true)
+
+      await new Promise((resolve) => window.setTimeout(resolve, 700))
+
+      const authenticatedUser = await login({
+        email: values.email.trim(),
+        password: values.password,
+      })
+      const destination = authenticatedUser.onboarding_completed
+        ? '/dashboard'
+        : '/onboarding'
+      navigate(destination, { replace: true })
     } catch (error) {
+      if (accountCreated) {
+        navigate('/login', { replace: true })
+        return
+      }
+
       if (error instanceof ApiError && error.status === 409) {
         setApiError('An account with this email already exists.')
       } else {
@@ -149,7 +160,7 @@ function SignupPage() {
 
         {isSuccess && (
           <p className="form-success" role="status">
-            Profile created successfully. Redirecting to sign in...
+            Profile created successfully. Preparing your experience...
           </p>
         )}
 
