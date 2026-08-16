@@ -87,11 +87,13 @@ class DashboardMemeApiTests(unittest.TestCase):
         )
 
         response = self.client.get("/api/dashboard")
+        serialized_response = response.text
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["daily_date"], "2026-08-16")
         self.assertEqual(response.json()["meme"]["id"], "coinsight-refresh")
         self.assertEqual(response.json()["meme_status"], "fallback")
+        self.assertNotIn("test-demo-key-not-a-real-secret", serialized_response)
         self.assertEqual(
             response.json()["feedback"]["ai_insight"],
             {"ai-2026-08-16": "down"},

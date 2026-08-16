@@ -10,6 +10,7 @@ load_dotenv(BACKEND_DIR / ".env")
 DATABASE_URL = os.getenv("DATABASE_URL")
 JWT_SECRET = os.getenv("JWT_SECRET")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+COINGECKO_API_KEY = os.getenv("COINGECKO_API_KEY")
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 
