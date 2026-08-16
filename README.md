@@ -52,6 +52,8 @@ External providers are mocked in the automated test suite.
 
 ## Documentation
 
-- [Project Overview](PROJECT_OVERVIEW.md)
-- [Technical Overview](TECHNICAL_OVERVIEW.md)
+- [Project Overview](docs/PROJECT_OVERVIEW.md)
+- [Technical Overview](docs/TECHNICAL_OVERVIEW.md)
+- [User Guide](docs/USER_GUIDE.md)
+- [AI Usage Summary](docs/AI_USAGE.md)
 - [Backend Setup](backend/README.md)
