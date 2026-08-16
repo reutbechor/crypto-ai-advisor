@@ -1,5 +1,4 @@
-import FeedbackButtons from './FeedbackButtons.jsx'
-
+import DailyDateLabel from './DailyDateLabel.jsx'
 
 const assetLabels = {
   bitcoin: 'Bitcoin',
@@ -23,7 +22,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
 })
 
-function AIInsightSection({ currentVote, insight, onVote, status }) {
+function AIInsightSection({ dailyDate, insight, status }) {
   const isGenerated = status === 'available'
 
   return (
@@ -38,7 +37,10 @@ function AIInsightSection({ currentVote, insight, onVote, status }) {
           <p className="eyebrow">{isGenerated ? 'AI generated' : 'Market insight'}</p>
           <h2 id="ai-insight-title">AI Insight</h2>
         </div>
-        <p>Personalized perspective based on your profile and followed assets.</p>
+        <div className="ai-insight-heading-meta">
+          <p>Personalized perspective based on your profile and followed assets.</p>
+          <DailyDateLabel date={dailyDate} label="Daily AI Insight" />
+        </div>
       </header>
 
       {insight ? (
@@ -63,12 +65,6 @@ function AIInsightSection({ currentVote, insight, onVote, status }) {
             {insight.content.split('\n\n').map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
-            <FeedbackButtons
-              currentVote={currentVote}
-              onVote={onVote}
-              prompt="Was this insight useful?"
-              subject="AI insight"
-            />
           </div>
         </article>
       ) : (

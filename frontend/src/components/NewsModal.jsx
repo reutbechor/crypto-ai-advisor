@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react'
-import FeedbackButtons from './FeedbackButtons.jsx'
 
 
 const assetLabels = {
@@ -17,7 +16,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
 })
 
-function NewsModal({ currentVote, item, onClose, onVote }) {
+function NewsModal({ item, onClose }) {
   const dialogRef = useRef(null)
 
   useEffect(() => {
@@ -114,13 +113,6 @@ function NewsModal({ currentVote, item, onClose, onVote }) {
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
-
-        <FeedbackButtons
-          currentVote={currentVote}
-          onVote={onVote}
-          prompt="Was this brief useful?"
-          subject="market brief"
-        />
 
         <div className="news-modal-actions">
           <button className="button button--secondary" type="button" onClick={onClose}>

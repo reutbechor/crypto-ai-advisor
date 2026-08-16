@@ -1,3 +1,4 @@
+import DailyDateLabel from './DailyDateLabel.jsx'
 import MemeImage from './MemeImage.jsx'
 
 
@@ -48,6 +49,7 @@ function DashboardOverview({ dashboard, onNavigate }) {
           <p className="eyebrow">Overview</p>
           <h2 id="glance-title">Today at a Glance</h2>
         </div>
+        <DailyDateLabel date={dashboard.daily_date} label="Daily Brief" />
       </header>
 
       <div className="overview-grid">
@@ -94,9 +96,7 @@ function DashboardOverview({ dashboard, onNavigate }) {
 
         <article className="overview-card overview-card--ai">
           <div className="overview-future-mark" aria-hidden="true">AI</div>
-          <p className="overview-card-label">
-            {dashboard.ai_status === 'available' ? 'AI Insight' : 'Market Insight'}
-          </p>
+          <DailyDateLabel date={dashboard.daily_date} label="Daily AI Insight" />
           <h3>{aiInsight ? createInsightPreview(aiInsight.content) : 'Insight temporarily unavailable'}</h3>
           {aiInsight && (
             <span className="coming-label">
@@ -114,7 +114,7 @@ function DashboardOverview({ dashboard, onNavigate }) {
               alt={meme.alt_text}
             />
           )}
-          <p className="overview-card-label">Crypto Mood</p>
+          <DailyDateLabel date={dashboard.daily_date} label="Daily Meme" />
           <h3>{meme ? meme.title : 'Crypto mood is temporarily unavailable.'}</h3>
           <OverviewAction sectionId="meme" onNavigate={onNavigate}>View Meme</OverviewAction>
         </article>

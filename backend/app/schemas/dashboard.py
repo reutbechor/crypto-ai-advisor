@@ -1,9 +1,8 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, Field
 
-from app.schemas.feedback import DashboardFeedbackResponse
 from app.schemas.onboarding import CryptoAsset, InvestorType, PreferenceResponse
 
 
@@ -56,6 +55,7 @@ class MemeResponse(BaseModel):
 
 
 class DashboardResponse(BaseModel):
+    daily_date: date
     user: DashboardUserResponse
     preferences: PreferenceResponse
     market: list[MarketCoinResponse]
@@ -66,4 +66,3 @@ class DashboardResponse(BaseModel):
     ai_status: Literal["available", "fallback"]
     meme: MemeResponse | None
     meme_status: Literal["available", "fallback", "unavailable"]
-    feedback: DashboardFeedbackResponse

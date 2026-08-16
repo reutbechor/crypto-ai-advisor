@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import AIInsightSection from '../components/AIInsightSection.jsx'
 import Brand from '../components/Brand.jsx'
 import CryptoMoodSection from '../components/CryptoMoodSection.jsx'
@@ -11,7 +11,10 @@ import NewsModal from '../components/NewsModal.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { ApiError } from '../services/apiClient.js'
 import { getDashboard } from '../services/dashboardApi.js'
-import { saveFeedback } from '../services/feedbackApi.js'
+import {
+  getDashboardNavigationItems,
+  getOrderedDashboardSections,
+} from '../utils/dashboardSections.js'
 
 
 const assetLabels = {
@@ -35,28 +38,6 @@ const contentLabels = {
   fun: 'Fun',
 }
 
-const dashboardSectionIds = ['overview', 'market', 'news', 'ai-insight', 'meme']
-
-function updateFeedbackState(currentDashboard, contentType, contentId, vote) {
-  const typeFeedback = {
-    ...(currentDashboard.feedback?.[contentType] || {}),
-  }
-
-  if (vote) {
-    typeFeedback[contentId] = vote
-  } else {
-    delete typeFeedback[contentId]
-  }
-
-  return {
-    ...currentDashboard,
-    feedback: {
-      ...currentDashboard.feedback,
-      [contentType]: typeFeedback,
-    },
-  }
-}
-
 function DashboardPage() {
   const { logout, token, user } = useAuth()
   const [dashboard, setDashboard] = useState(null)
@@ -68,6 +49,15 @@ function DashboardPage() {
   const newsTriggerRef = useRef(null)
   const navigationLockRef = useRef(null)
   const navigationUnlockTimeoutRef = useRef(null)
+  const contentPreferences = dashboard?.preferences?.content_preferences
+  const orderedSections = useMemo(
+    () => getOrderedDashboardSections(contentPreferences),
+    [contentPreferences],
+  )
+  const navigationItems = useMemo(
+    () => getDashboardNavigationItems(contentPreferences),
+    [contentPreferences],
+  )
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true)
@@ -96,34 +86,6 @@ function DashboardPage() {
     setSelectedNewsItem(null)
     window.requestAnimationFrame(() => newsTriggerRef.current?.focus())
   }, [])
-
-  const submitFeedback = useCallback(async (contentType, contentId, vote) => {
-    const previousVote = dashboard.feedback?.[contentType]?.[contentId] || null
-    const optimisticVote = previousVote === vote ? null : vote
-
-    setDashboard((currentDashboard) => (
-      updateFeedbackState(currentDashboard, contentType, contentId, optimisticVote)
-    ))
-
-    try {
-      const result = await saveFeedback(token, {
-        content_type: contentType,
-        content_id: contentId,
-        vote,
-      })
-      setDashboard((currentDashboard) => (
-        updateFeedbackState(currentDashboard, contentType, contentId, result.vote)
-      ))
-    } catch (error) {
-      setDashboard((currentDashboard) => (
-        updateFeedbackState(currentDashboard, contentType, contentId, previousVote)
-      ))
-      if (error instanceof ApiError && error.status === 401) {
-        logout()
-      }
-      throw error
-    }
-  }, [dashboard, logout, token])
 
   const navigateToSection = useCallback((sectionId) => {
     const section = document.getElementById(sectionId)
@@ -161,7 +123,8 @@ function DashboardPage() {
       return undefined
     }
 
-    const sections = dashboardSectionIds
+    const sections = navigationItems
+      .map(({ id }) => id)
       .map((sectionId) => document.getElementById(sectionId))
       .filter(Boolean)
 
@@ -187,10 +150,90 @@ function DashboardPage() {
 
     sections.forEach((section) => observer.observe(section))
     return () => observer.disconnect()
-  }, [dashboard])
+  }, [dashboard, navigationItems])
 
   const displayName = dashboard?.user.name || user.name
   const firstName = displayName.trim().split(/\s+/)[0]
+  const fullSectionContent = dashboard ? {
+    market: (
+      <section
+        className="dashboard-market dashboard-anchor-section"
+        id="market"
+        aria-labelledby="market-title"
+        tabIndex="-1"
+      >
+        <header className="dashboard-section-heading">
+          <div>
+            <h2 id="market-title">Your Market</h2>
+            <p>Live prices for the assets you follow.</p>
+          </div>
+          <span className="live-label">
+            <span aria-hidden="true" /> Live USD
+          </span>
+        </header>
+
+        {dashboard.market_status === 'unavailable' ? (
+          <div className="market-unavailable" role="status">
+            <div>
+              <h3>Market data is temporarily unavailable.</h3>
+              <p>Your preferences are safe. Try loading prices again.</p>
+            </div>
+            <button className="button button--secondary" type="button" onClick={loadDashboard}>
+              Try Again
+            </button>
+          </div>
+        ) : (
+          <div className="market-grid">
+            {dashboard.market.map((coin) => (
+              <MarketCard coin={coin} key={coin.id} />
+            ))}
+          </div>
+        )}
+      </section>
+    ),
+    news: (
+      <section
+        className="dashboard-news dashboard-anchor-section"
+        id="news"
+        aria-labelledby="news-title"
+        tabIndex="-1"
+      >
+        <header className="dashboard-section-heading">
+          <div>
+            <h2 id="news-title">Market News</h2>
+            <p>Updates matched to the assets you follow.</p>
+          </div>
+          <span className="brief-label">Curated Market Briefs</span>
+        </header>
+
+        {dashboard.news_status === 'unavailable' || dashboard.news.length === 0 ? (
+          <div className="news-unavailable" role="status">
+            <h3>News is temporarily unavailable.</h3>
+            <p>Your market data and saved preferences are still available.</p>
+          </div>
+        ) : (
+          <div className="news-grid">
+            {dashboard.news.map((item) => (
+              <NewsCard item={item} key={item.id} onRead={openNewsModal} />
+            ))}
+          </div>
+        )}
+      </section>
+    ),
+    'ai-insight': (
+      <AIInsightSection
+        dailyDate={dashboard.daily_date}
+        insight={dashboard.ai_insight}
+        status={dashboard.ai_status}
+      />
+    ),
+    meme: (
+      <CryptoMoodSection
+        dailyDate={dashboard.daily_date}
+        meme={dashboard.meme}
+      />
+    ),
+  } : {}
 
   return (
     <main className="dashboard-page">
@@ -209,7 +252,11 @@ function DashboardPage() {
         </header>
 
         {!isLoading && dashboard && !hasError && (
-          <DashboardNav activeSection={activeSection} onNavigate={navigateToSection} />
+          <DashboardNav
+            activeSection={activeSection}
+            items={navigationItems}
+            onNavigate={navigateToSection}
+          />
         )}
 
         {isLoading && <DashboardSkeleton />}
@@ -245,100 +292,25 @@ function DashboardPage() {
                 </p>
                 <strong>{investorLabels[dashboard.preferences.investor_type]}</strong>
                 <div className="content-preference-list">
-                  {dashboard.preferences.content_preferences.map((preference) => (
-                    <span key={preference}>{contentLabels[preference]}</span>
-                  ))}
+                  {(dashboard.preferences.content_preferences || [])
+                    .filter((preference) => contentLabels[preference])
+                    .map((preference) => (
+                      <span key={preference}>{contentLabels[preference]}</span>
+                    ))}
                 </div>
               </div>
             </section>
 
             <DashboardOverview dashboard={dashboard} onNavigate={navigateToSection} />
 
-            <section
-              className="dashboard-market dashboard-anchor-section"
-              id="market"
-              aria-labelledby="market-title"
-              tabIndex="-1"
-            >
-              <header className="dashboard-section-heading">
-                <div>
-                  <h2 id="market-title">Your Market</h2>
-                  <p>Live prices for the assets you follow.</p>
-                </div>
-                <span className="live-label">
-                  <span aria-hidden="true" /> Live USD
-                </span>
-              </header>
-
-              {dashboard.market_status === 'unavailable' ? (
-                <div className="market-unavailable" role="status">
-                  <div>
-                    <h3>Market data is temporarily unavailable.</h3>
-                    <p>Your preferences are safe. Try loading prices again.</p>
-                  </div>
-                  <button className="button button--secondary" type="button" onClick={loadDashboard}>
-                    Try Again
-                  </button>
-                </div>
-              ) : (
-                <div className="market-grid">
-                  {dashboard.market.map((coin) => (
-                    <MarketCard coin={coin} key={coin.id} />
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <section
-              className="dashboard-news dashboard-anchor-section"
-              id="news"
-              aria-labelledby="news-title"
-              tabIndex="-1"
-            >
-              <header className="dashboard-section-heading">
-                <div>
-                  <h2 id="news-title">Market News</h2>
-                  <p>Updates matched to the assets you follow.</p>
-                </div>
-                <span className="brief-label">Curated Market Briefs</span>
-              </header>
-
-              {dashboard.news_status === 'unavailable' || dashboard.news.length === 0 ? (
-                <div className="news-unavailable" role="status">
-                  <h3>News is temporarily unavailable.</h3>
-                  <p>Your market data and saved preferences are still available.</p>
-                </div>
-              ) : (
-                <div className="news-grid">
-                  {dashboard.news.map((item) => (
-                    <NewsCard item={item} key={item.id} onRead={openNewsModal} />
-                  ))}
-                </div>
-              )}
-            </section>
-
-            <AIInsightSection
-              currentVote={dashboard.feedback.ai_insight[dashboard.ai_insight.id] || null}
-              insight={dashboard.ai_insight}
-              onVote={(vote) => submitFeedback('ai_insight', dashboard.ai_insight.id, vote)}
-              status={dashboard.ai_status}
-            />
-
-            <CryptoMoodSection
-              currentVote={dashboard.meme ? dashboard.feedback.meme[dashboard.meme.id] || null : null}
-              meme={dashboard.meme}
-              onVote={(vote) => submitFeedback('meme', dashboard.meme.id, vote)}
-            />
+            {orderedSections.map(({ id }) => (
+              <Fragment key={id}>{fullSectionContent[id]}</Fragment>
+            ))}
           </div>
         )}
 
         {selectedNewsItem && (
-          <NewsModal
-            currentVote={dashboard.feedback.news[selectedNewsItem.id] || null}
-            item={selectedNewsItem}
-            onClose={closeNewsModal}
-            onVote={(vote) => submitFeedback('news', selectedNewsItem.id, vote)}
-          />
+          <NewsModal item={selectedNewsItem} onClose={closeNewsModal} />
         )}
       </div>
     </main>

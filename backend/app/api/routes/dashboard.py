@@ -9,10 +9,12 @@ from app.schemas.dashboard import (
     DashboardUserResponse,
 )
 from app.schemas.onboarding import PreferenceResponse
-from app.services.ai_insight import generate_ai_insight
-from app.services.feedback import get_feedback_state
+from app.services.daily_content import (
+    current_daily_date,
+    get_or_create_daily_ai,
+    get_or_create_daily_meme,
+)
 from app.services.market import fetch_market_data
-from app.services.meme import fetch_meme
 from app.services.news import select_personalized_news
 from app.services.onboarding import get_user_preferences
 
@@ -34,15 +36,23 @@ def read_dashboard(
 
     market, market_status = fetch_market_data(preferences.crypto_assets)
     news, news_status = select_personalized_news(preferences.crypto_assets)
-    ai_insight, ai_status = generate_ai_insight(
+    daily_date = current_daily_date()
+    ai_insight, ai_status, _ = get_or_create_daily_ai(
+        db,
+        current_user.id,
         preferences.investor_type,
         preferences.crypto_assets,
         market,
+        for_date=daily_date,
     )
-    meme, meme_status = fetch_meme()
-    feedback = get_feedback_state(db, current_user.id)
+    meme, meme_status, _ = get_or_create_daily_meme(
+        db,
+        current_user.id,
+        for_date=daily_date,
+    )
 
     return DashboardResponse(
+        daily_date=daily_date,
         user=DashboardUserResponse(id=current_user.id, name=current_user.name),
         preferences=PreferenceResponse.model_validate(preferences),
         market=market,
@@ -53,5 +63,4 @@ def read_dashboard(
         ai_status=ai_status,
         meme=meme,
         meme_status=meme_status,
-        feedback=feedback,
     )
