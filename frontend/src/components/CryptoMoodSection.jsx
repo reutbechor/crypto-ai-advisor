@@ -1,8 +1,9 @@
 import DailyDateLabel from './DailyDateLabel.jsx'
+import FeedbackButtons from './FeedbackButtons.jsx'
 import MemeImage from './MemeImage.jsx'
 
 
-function CryptoMoodSection({ dailyDate, meme }) {
+function CryptoMoodSection({ currentVote, dailyDate, meme, onVote }) {
   return (
     <section
       className="dashboard-crypto-mood dashboard-anchor-section"
@@ -41,6 +42,12 @@ function CryptoMoodSection({ dailyDate, meme }) {
                 View Source <span aria-hidden="true">↗</span>
               </a>
             )}
+            <FeedbackButtons
+              currentVote={currentVote}
+              onVote={onVote}
+              prompt="Did this make your crypto day better?"
+              subject="crypto meme"
+            />
           </div>
         </div>
       )}

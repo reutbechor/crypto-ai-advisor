@@ -14,6 +14,7 @@ from app.schemas.dashboard import (
     AIInsightResponse,
     MemeResponse,
 )
+from app.schemas.feedback import DashboardFeedbackResponse
 
 
 class DashboardMemeApiTests(unittest.TestCase):
@@ -28,6 +29,7 @@ class DashboardMemeApiTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 401)
 
+    @patch("app.api.routes.dashboard.get_feedback_state")
     @patch("app.api.routes.dashboard.get_or_create_daily_meme")
     @patch("app.api.routes.dashboard.get_or_create_daily_ai")
     @patch("app.api.routes.dashboard.current_daily_date")
@@ -42,6 +44,7 @@ class DashboardMemeApiTests(unittest.TestCase):
         get_daily_date,
         get_daily_insight,
         get_daily_meme,
+        get_feedback,
     ):
         user = User(id=7, name="Demo User", email="demo@example.com", password_hash="unused")
         preferences = SimpleNamespace(
@@ -50,7 +53,7 @@ class DashboardMemeApiTests(unittest.TestCase):
             content_preferences=["fun"],
         )
         insight = AIInsightResponse(
-            id="daily-2026-08-16",
+            id="ai-2026-08-16",
             title="Market context",
             content="Keep short-term movement in context.",
             generated_for=AIInsightAudienceResponse(
@@ -77,6 +80,11 @@ class DashboardMemeApiTests(unittest.TestCase):
         get_daily_date.return_value = daily_date
         get_daily_insight.return_value = (insight, "fallback", daily_date)
         get_daily_meme.return_value = (meme, "fallback", daily_date)
+        get_feedback.return_value = DashboardFeedbackResponse(
+            news={"story-1": "up"},
+            ai_insight={"ai-2026-08-16": "down"},
+            meme={"coinsight-refresh": "up"},
+        )
 
         response = self.client.get("/api/dashboard")
 
@@ -84,6 +92,14 @@ class DashboardMemeApiTests(unittest.TestCase):
         self.assertEqual(response.json()["daily_date"], "2026-08-16")
         self.assertEqual(response.json()["meme"]["id"], "coinsight-refresh")
         self.assertEqual(response.json()["meme_status"], "fallback")
+        self.assertEqual(
+            response.json()["feedback"]["ai_insight"],
+            {"ai-2026-08-16": "down"},
+        )
+        self.assertEqual(
+            response.json()["feedback"]["meme"],
+            {"coinsight-refresh": "up"},
+        )
         get_daily_insight.assert_called_once_with(
             None,
             7,
@@ -97,6 +113,7 @@ class DashboardMemeApiTests(unittest.TestCase):
             7,
             for_date=daily_date,
         )
+        get_feedback.assert_called_once_with(None, 7)
 
 
 if __name__ == "__main__":

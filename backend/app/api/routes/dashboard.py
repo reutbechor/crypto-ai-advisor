@@ -14,6 +14,7 @@ from app.services.daily_content import (
     get_or_create_daily_ai,
     get_or_create_daily_meme,
 )
+from app.services.feedback import get_feedback_state
 from app.services.market import fetch_market_data
 from app.services.news import select_personalized_news
 from app.services.onboarding import get_user_preferences
@@ -50,6 +51,7 @@ def read_dashboard(
         current_user.id,
         for_date=daily_date,
     )
+    feedback = get_feedback_state(db, current_user.id)
 
     return DashboardResponse(
         daily_date=daily_date,
@@ -63,4 +65,5 @@ def read_dashboard(
         ai_status=ai_status,
         meme=meme,
         meme_status=meme_status,
+        feedback=feedback,
     )

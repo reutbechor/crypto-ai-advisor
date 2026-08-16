@@ -1,4 +1,5 @@
 import DailyDateLabel from './DailyDateLabel.jsx'
+import FeedbackButtons from './FeedbackButtons.jsx'
 
 const assetLabels = {
   bitcoin: 'Bitcoin',
@@ -22,7 +23,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
 })
 
-function AIInsightSection({ dailyDate, insight, status }) {
+function AIInsightSection({ currentVote, dailyDate, insight, onVote, status }) {
   const isGenerated = status === 'available'
 
   return (
@@ -65,6 +66,12 @@ function AIInsightSection({ dailyDate, insight, status }) {
             {insight.content.split('\n\n').map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
+            <FeedbackButtons
+              currentVote={currentVote}
+              onVote={onVote}
+              prompt="Was this insight useful?"
+              subject="AI insight"
+            />
           </div>
         </article>
       ) : (
