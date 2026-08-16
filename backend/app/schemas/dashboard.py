@@ -3,6 +3,7 @@ from typing import Literal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.feedback import DashboardFeedbackResponse
 from app.schemas.onboarding import CryptoAsset, InvestorType, PreferenceResponse
 
 
@@ -38,6 +39,7 @@ class AIInsightAudienceResponse(BaseModel):
 
 
 class AIInsightResponse(BaseModel):
+    id: str
     title: str
     content: str
     generated_for: AIInsightAudienceResponse
@@ -64,3 +66,4 @@ class DashboardResponse(BaseModel):
     ai_status: Literal["available", "fallback"]
     meme: MemeResponse | None
     meme_status: Literal["available", "fallback", "unavailable"]
+    feedback: DashboardFeedbackResponse

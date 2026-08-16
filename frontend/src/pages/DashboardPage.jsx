@@ -11,6 +11,7 @@ import NewsModal from '../components/NewsModal.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { ApiError } from '../services/apiClient.js'
 import { getDashboard } from '../services/dashboardApi.js'
+import { saveFeedback } from '../services/feedbackApi.js'
 
 
 const assetLabels = {
@@ -35,6 +36,26 @@ const contentLabels = {
 }
 
 const dashboardSectionIds = ['overview', 'market', 'news', 'ai-insight', 'meme']
+
+function updateFeedbackState(currentDashboard, contentType, contentId, vote) {
+  const typeFeedback = {
+    ...(currentDashboard.feedback?.[contentType] || {}),
+  }
+
+  if (vote) {
+    typeFeedback[contentId] = vote
+  } else {
+    delete typeFeedback[contentId]
+  }
+
+  return {
+    ...currentDashboard,
+    feedback: {
+      ...currentDashboard.feedback,
+      [contentType]: typeFeedback,
+    },
+  }
+}
 
 function DashboardPage() {
   const { logout, token, user } = useAuth()
@@ -75,6 +96,34 @@ function DashboardPage() {
     setSelectedNewsItem(null)
     window.requestAnimationFrame(() => newsTriggerRef.current?.focus())
   }, [])
+
+  const submitFeedback = useCallback(async (contentType, contentId, vote) => {
+    const previousVote = dashboard.feedback?.[contentType]?.[contentId] || null
+    const optimisticVote = previousVote === vote ? null : vote
+
+    setDashboard((currentDashboard) => (
+      updateFeedbackState(currentDashboard, contentType, contentId, optimisticVote)
+    ))
+
+    try {
+      const result = await saveFeedback(token, {
+        content_type: contentType,
+        content_id: contentId,
+        vote,
+      })
+      setDashboard((currentDashboard) => (
+        updateFeedbackState(currentDashboard, contentType, contentId, result.vote)
+      ))
+    } catch (error) {
+      setDashboard((currentDashboard) => (
+        updateFeedbackState(currentDashboard, contentType, contentId, previousVote)
+      ))
+      if (error instanceof ApiError && error.status === 401) {
+        logout()
+      }
+      throw error
+    }
+  }, [dashboard, logout, token])
 
   const navigateToSection = useCallback((sectionId) => {
     const section = document.getElementById(sectionId)
@@ -269,16 +318,27 @@ function DashboardPage() {
             </section>
 
             <AIInsightSection
+              currentVote={dashboard.feedback.ai_insight[dashboard.ai_insight.id] || null}
               insight={dashboard.ai_insight}
+              onVote={(vote) => submitFeedback('ai_insight', dashboard.ai_insight.id, vote)}
               status={dashboard.ai_status}
             />
 
-            <CryptoMoodSection meme={dashboard.meme} />
+            <CryptoMoodSection
+              currentVote={dashboard.meme ? dashboard.feedback.meme[dashboard.meme.id] || null : null}
+              meme={dashboard.meme}
+              onVote={(vote) => submitFeedback('meme', dashboard.meme.id, vote)}
+            />
           </div>
         )}
 
         {selectedNewsItem && (
-          <NewsModal item={selectedNewsItem} onClose={closeNewsModal} />
+          <NewsModal
+            currentVote={dashboard.feedback.news[selectedNewsItem.id] || null}
+            item={selectedNewsItem}
+            onClose={closeNewsModal}
+            onVote={(vote) => submitFeedback('news', selectedNewsItem.id, vote)}
+          />
         )}
       </div>
     </main>

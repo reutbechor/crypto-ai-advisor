@@ -122,6 +122,7 @@ def generate_ai_insight(
 
         return (
             AIInsightResponse(
+                id=f"daily-{generated_at.date().isoformat()}",
                 title="Your Daily AI Insight",
                 content=content,
                 generated_for=AIInsightAudienceResponse(
@@ -281,6 +282,7 @@ def _build_fallback_insight(
     )
 
     return AIInsightResponse(
+        id=f"daily-{generated_at.date().isoformat()}",
         title="Your Daily Market Insight",
         content=content,
         generated_for=AIInsightAudienceResponse(

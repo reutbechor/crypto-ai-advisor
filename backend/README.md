@@ -42,4 +42,12 @@ the dashboard uses a deterministic personalized market insight instead.
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - OpenAPI JSON: `http://127.0.0.1:8000/openapi.json`
 
-The application creates the `users` table on startup when PostgreSQL is available.
+The application creates the registered SQLAlchemy tables on startup when PostgreSQL is available.
+
+## Feedback design note
+
+Feedback is stored only as each user's current positive or negative interaction with
+News, AI Insight and Crypto Mood content. A future production system could aggregate
+these interactions into user-level preference signals for re-ranking content categories,
+assets or recommendation candidates. No recommendation or model-training logic is
+implemented in this project.

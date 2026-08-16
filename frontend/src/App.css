@@ -1936,6 +1936,88 @@
   font-size: 13px;
 }
 
+.feedback-control {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 20px;
+  border-top: 1px solid var(--soft-border);
+}
+
+.feedback-prompt {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.feedback-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.feedback-button {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--muted);
+  background: color-mix(in srgb, var(--white) 72%, transparent);
+  cursor: pointer;
+  transition:
+    color 150ms ease,
+    border-color 150ms ease,
+    background-color 150ms ease,
+    transform 150ms ease;
+}
+
+.feedback-button:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange-hover);
+  transform: translateY(-1px);
+}
+
+.feedback-button--selected {
+  border-color: var(--orange);
+  color: var(--orange-hover);
+  background: color-mix(in srgb, var(--orange) 12%, var(--white));
+}
+
+.feedback-button:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--orange) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.feedback-button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
+.feedback-button svg {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.feedback-error {
+  flex-basis: 100%;
+  color: var(--error);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.news-modal > .feedback-control {
+  margin-top: 30px;
+}
+
 .news-unavailable {
   min-height: 160px;
   padding: 28px;
@@ -2066,6 +2148,32 @@
 
 .ai-insight-copy p + p {
   margin-top: 18px;
+}
+
+.ai-insight-copy .feedback-control {
+  margin-top: 30px;
+  border-color: color-mix(in srgb, var(--white) 14%, transparent);
+}
+
+.dashboard-ai-insight .feedback-prompt {
+  color: color-mix(in srgb, var(--white) 65%, transparent);
+}
+
+.dashboard-ai-insight .feedback-button {
+  border-color: color-mix(in srgb, var(--white) 24%, transparent);
+  color: color-mix(in srgb, var(--white) 74%, transparent);
+  background: color-mix(in srgb, var(--white) 7%, transparent);
+}
+
+.dashboard-ai-insight .feedback-button:hover:not(:disabled),
+.dashboard-ai-insight .feedback-button--selected {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: color-mix(in srgb, var(--orange) 14%, transparent);
+}
+
+.dashboard-ai-insight .feedback-error {
+  color: #ffb49b;
 }
 
 .ai-insight-unavailable {
@@ -2225,6 +2333,10 @@
 .crypto-mood-copy a:focus-visible {
   outline: 3px solid color-mix(in srgb, var(--orange) 35%, transparent);
   outline-offset: 5px;
+}
+
+.crypto-mood-copy .feedback-control {
+  margin-top: 30px;
 }
 
 .crypto-mood-unavailable {
@@ -2923,6 +3035,10 @@
     font-size: clamp(31px, 10vw, 42px);
   }
 
+  .feedback-control {
+    align-items: flex-start;
+  }
+
   .skeleton-block--welcome {
     height: 282px;
     border-radius: 20px;
@@ -3019,6 +3135,10 @@
   .overview-card > button span,
   .news-card,
   .news-card-footer button span {
+    transition: none;
+  }
+
+  .feedback-button {
     transition: none;
   }
 

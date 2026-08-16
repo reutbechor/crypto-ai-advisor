@@ -1,3 +1,6 @@
+import FeedbackButtons from './FeedbackButtons.jsx'
+
+
 const assetLabels = {
   bitcoin: 'Bitcoin',
   ethereum: 'Ethereum',
@@ -20,7 +23,7 @@ const dateFormatter = new Intl.DateTimeFormat('en-US', {
   minute: '2-digit',
 })
 
-function AIInsightSection({ insight, status }) {
+function AIInsightSection({ currentVote, insight, onVote, status }) {
   const isGenerated = status === 'available'
 
   return (
@@ -60,6 +63,12 @@ function AIInsightSection({ insight, status }) {
             {insight.content.split('\n\n').map((paragraph) => (
               <p key={paragraph}>{paragraph}</p>
             ))}
+            <FeedbackButtons
+              currentVote={currentVote}
+              onVote={onVote}
+              prompt="Was this insight useful?"
+              subject="AI insight"
+            />
           </div>
         </article>
       ) : (

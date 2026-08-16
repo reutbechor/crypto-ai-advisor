@@ -10,6 +10,7 @@ from app.schemas.dashboard import (
 )
 from app.schemas.onboarding import PreferenceResponse
 from app.services.ai_insight import generate_ai_insight
+from app.services.feedback import get_feedback_state
 from app.services.market import fetch_market_data
 from app.services.meme import fetch_meme
 from app.services.news import select_personalized_news
@@ -39,6 +40,7 @@ def read_dashboard(
         market,
     )
     meme, meme_status = fetch_meme()
+    feedback = get_feedback_state(db, current_user.id)
 
     return DashboardResponse(
         user=DashboardUserResponse(id=current_user.id, name=current_user.name),
@@ -51,4 +53,5 @@ def read_dashboard(
         ai_status=ai_status,
         meme=meme,
         meme_status=meme_status,
+        feedback=feedback,
     )
