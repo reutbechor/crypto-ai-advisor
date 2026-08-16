@@ -9,7 +9,9 @@ from app.schemas.dashboard import (
     DashboardUserResponse,
 )
 from app.schemas.onboarding import PreferenceResponse
+from app.services.ai_insight import generate_ai_insight
 from app.services.market import fetch_market_data
+from app.services.meme import fetch_meme
 from app.services.news import select_personalized_news
 from app.services.onboarding import get_user_preferences
 
@@ -31,6 +33,12 @@ def read_dashboard(
 
     market, market_status = fetch_market_data(preferences.crypto_assets)
     news, news_status = select_personalized_news(preferences.crypto_assets)
+    ai_insight, ai_status = generate_ai_insight(
+        preferences.investor_type,
+        preferences.crypto_assets,
+        market,
+    )
+    meme, meme_status = fetch_meme()
 
     return DashboardResponse(
         user=DashboardUserResponse(id=current_user.id, name=current_user.name),
@@ -39,4 +47,8 @@ def read_dashboard(
         market_status=market_status,
         news=news,
         news_status=news_status,
+        ai_insight=ai_insight,
+        ai_status=ai_status,
+        meme=meme,
+        meme_status=meme_status,
     )

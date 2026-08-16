@@ -1,8 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import AIInsightSection from '../components/AIInsightSection.jsx'
 import Brand from '../components/Brand.jsx'
+import CryptoMoodSection from '../components/CryptoMoodSection.jsx'
+import DashboardNav from '../components/DashboardNav.jsx'
+import DashboardOverview from '../components/DashboardOverview.jsx'
 import DashboardSkeleton from '../components/DashboardSkeleton.jsx'
 import MarketCard from '../components/MarketCard.jsx'
 import NewsCard from '../components/NewsCard.jsx'
+import NewsModal from '../components/NewsModal.jsx'
 import useAuth from '../hooks/useAuth.js'
 import { ApiError } from '../services/apiClient.js'
 import { getDashboard } from '../services/dashboardApi.js'
@@ -29,12 +34,19 @@ const contentLabels = {
   fun: 'Fun',
 }
 
+const dashboardSectionIds = ['overview', 'market', 'news', 'ai-insight', 'meme']
+
 function DashboardPage() {
   const { logout, token, user } = useAuth()
   const [dashboard, setDashboard] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [hasError, setHasError] = useState(false)
+  const [selectedNewsItem, setSelectedNewsItem] = useState(null)
+  const [activeSection, setActiveSection] = useState('overview')
   const hasLoaded = useRef(false)
+  const newsTriggerRef = useRef(null)
+  const navigationLockRef = useRef(null)
+  const navigationUnlockTimeoutRef = useRef(null)
 
   const loadDashboard = useCallback(async () => {
     setIsLoading(true)
@@ -54,6 +66,37 @@ function DashboardPage() {
     }
   }, [logout, token])
 
+  const openNewsModal = useCallback((item, event) => {
+    newsTriggerRef.current = event.currentTarget
+    setSelectedNewsItem(item)
+  }, [])
+
+  const closeNewsModal = useCallback(() => {
+    setSelectedNewsItem(null)
+    window.requestAnimationFrame(() => newsTriggerRef.current?.focus())
+  }, [])
+
+  const navigateToSection = useCallback((sectionId) => {
+    const section = document.getElementById(sectionId)
+    if (!section) {
+      return
+    }
+
+    window.clearTimeout(navigationUnlockTimeoutRef.current)
+    navigationLockRef.current = sectionId
+    setActiveSection(sectionId)
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    section.scrollIntoView({
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+      block: 'start',
+    })
+    section.focus({ preventScroll: true })
+    navigationUnlockTimeoutRef.current = window.setTimeout(() => {
+      navigationLockRef.current = null
+    }, prefersReducedMotion ? 100 : 1400)
+  }, [])
+
   useEffect(() => {
     if (hasLoaded.current) {
       return
@@ -61,6 +104,41 @@ function DashboardPage() {
     hasLoaded.current = true
     loadDashboard()
   }, [loadDashboard])
+
+  useEffect(() => () => window.clearTimeout(navigationUnlockTimeoutRef.current), [])
+
+  useEffect(() => {
+    if (!dashboard) {
+      return undefined
+    }
+
+    const sections = dashboardSectionIds
+      .map((sectionId) => document.getElementById(sectionId))
+      .filter(Boolean)
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (navigationLockRef.current) {
+          return
+        }
+
+        const visibleSection = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((first, second) => second.intersectionRatio - first.intersectionRatio)[0]
+
+        if (visibleSection) {
+          setActiveSection(visibleSection.target.id)
+        }
+      },
+      {
+        rootMargin: '-72px 0px -58% 0px',
+        threshold: [0, 0.1, 0.3],
+      },
+    )
+
+    sections.forEach((section) => observer.observe(section))
+    return () => observer.disconnect()
+  }, [dashboard])
 
   const displayName = dashboard?.user.name || user.name
   const firstName = displayName.trim().split(/\s+/)[0]
@@ -81,6 +159,10 @@ function DashboardPage() {
           </div>
         </header>
 
+        {!isLoading && dashboard && !hasError && (
+          <DashboardNav activeSection={activeSection} onNavigate={navigateToSection} />
+        )}
+
         {isLoading && <DashboardSkeleton />}
 
         {!isLoading && hasError && (
@@ -96,7 +178,12 @@ function DashboardPage() {
 
         {!isLoading && dashboard && !hasError && (
           <div className="dashboard-content">
-            <section className="dashboard-welcome" aria-labelledby="dashboard-title">
+            <section
+              className="dashboard-welcome"
+              id="overview"
+              aria-labelledby="dashboard-title"
+              tabIndex="-1"
+            >
               <div>
                 <p className="eyebrow">Your workspace</p>
                 <h1 id="dashboard-title">Good to see you, {firstName}.</h1>
@@ -116,7 +203,14 @@ function DashboardPage() {
               </div>
             </section>
 
-            <section className="dashboard-market" aria-labelledby="market-title">
+            <DashboardOverview dashboard={dashboard} onNavigate={navigateToSection} />
+
+            <section
+              className="dashboard-market dashboard-anchor-section"
+              id="market"
+              aria-labelledby="market-title"
+              tabIndex="-1"
+            >
               <header className="dashboard-section-heading">
                 <div>
                   <h2 id="market-title">Your Market</h2>
@@ -146,7 +240,12 @@ function DashboardPage() {
               )}
             </section>
 
-            <section className="dashboard-news" aria-labelledby="news-title">
+            <section
+              className="dashboard-news dashboard-anchor-section"
+              id="news"
+              aria-labelledby="news-title"
+              tabIndex="-1"
+            >
               <header className="dashboard-section-heading">
                 <div>
                   <h2 id="news-title">Market News</h2>
@@ -163,12 +262,23 @@ function DashboardPage() {
               ) : (
                 <div className="news-grid">
                   {dashboard.news.map((item) => (
-                    <NewsCard item={item} key={item.id} />
+                    <NewsCard item={item} key={item.id} onRead={openNewsModal} />
                   ))}
                 </div>
               )}
             </section>
+
+            <AIInsightSection
+              insight={dashboard.ai_insight}
+              status={dashboard.ai_status}
+            />
+
+            <CryptoMoodSection meme={dashboard.meme} />
           </div>
+        )}
+
+        {selectedNewsItem && (
+          <NewsModal item={selectedNewsItem} onClose={closeNewsModal} />
         )}
       </div>
     </main>

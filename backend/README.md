@@ -24,6 +24,18 @@ Update `.env` with your PostgreSQL username and password, then start the API:
 python -m uvicorn app.main:app --reload
 ```
 
+## OpenRouter AI insight
+
+Create an OpenRouter API key and add it only to `backend/.env`:
+
+```env
+OPENROUTER_API_KEY=your-openrouter-api-key
+OPENROUTER_MODEL=openrouter/free
+```
+
+Never commit `backend/.env`. When the key is absent or OpenRouter is unavailable,
+the dashboard uses a deterministic personalized market insight instead.
+
 ## Verification
 
 - Database health: `http://127.0.0.1:8000/api/health`

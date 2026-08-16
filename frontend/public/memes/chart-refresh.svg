@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 800" role="img" aria-labelledby="title description">
+  <title id="title">Chart refresh crypto meme</title>
+  <desc id="description">A CoinSight original illustration about refreshing a crypto chart.</desc>
+  <rect width="1200" height="800" fill="#f4eee3"/>
+  <rect x="58" y="58" width="1084" height="684" rx="42" fill="#fffdf9" stroke="#171717" stroke-width="4"/>
+  <text x="104" y="138" fill="#ff5b16" font-family="Arial, Helvetica, sans-serif" font-size="28" font-weight="700" letter-spacing="5">COINSIGHT ORIGINAL</text>
+  <text x="104" y="236" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800">REFRESHED THE CHART.</text>
+  <text x="104" y="309" fill="#171717" font-family="Arial, Helvetica, sans-serif" font-size="62" font-weight="800">IT REFRESHED MY ANXIETY.</text>
+  <rect x="104" y="390" width="992" height="262" rx="28" fill="#171717"/>
+  <path d="M154 575 L265 526 L365 553 L480 448 L594 491 L704 430 L818 505 L934 420 L1044 456" fill="none" stroke="#ff5b16" stroke-width="18" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="1044" cy="456" r="18" fill="#fffdf9" stroke="#ff5b16" stroke-width="9"/>
+  <path d="M1006 582a55 55 0 1 1 28 48" fill="none" stroke="#fffdf9" stroke-width="12" stroke-linecap="round"/>
+  <path d="m1035 620 2 38 34-18" fill="none" stroke="#fffdf9" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
