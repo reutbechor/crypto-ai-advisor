@@ -1,29 +1,53 @@
-# AI Crypto Advisor
+# CoinSight AI
 
-An AI-powered cryptocurrency advisory application with separate frontend and backend components.
+A full-stack personalized crypto dashboard combining live market data, curated news, daily AI insights, and community feedback.
 
-## Frontend
+## Tech Stack
 
-## Backend
+- **Frontend:** React, Vite, React Router, JavaScript, CSS
+- **Backend:** FastAPI, SQLAlchemy, JWT authentication
+- **Database:** PostgreSQL on Supabase
+- **Integrations:** CoinGecko, OpenRouter, Meme API
 
-## Setup
+## Run Locally
 
-## Testing
-
-Backend tests:
+Copy the example environment files before starting each application.
 
 ```powershell
+# Backend
 cd backend
-python -m pytest
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements.txt
+Copy-Item .env.example .env
+python -m uvicorn app.main:app --reload
 ```
 
-Frontend tests:
+```powershell
+# Frontend - run in a second terminal
+cd frontend
+npm install
+Copy-Item .env.example .env
+npm run dev
+```
+
+- Frontend: `http://localhost:5173`
+- API documentation: `http://127.0.0.1:8000/docs`
+
+## Tests
 
 ```powershell
-cd frontend
+# From backend/
+python -m pytest
+
+# From frontend/
 npm run test -- --run
 ```
 
-Coverage reports are available with `python -m pytest --cov=app --cov-report=term-missing` in `backend` and `npm run test:coverage` in `frontend`.
+External providers are mocked in the automated test suite.
 
-The automated suite mocks CoinGecko, OpenRouter, and the Meme API. Daily behavior is tested with injected dates, so live services and Supabase are not required.
+## Documentation
+
+- [Project Overview](PROJECT_OVERVIEW.md)
+- [Technical Overview](TECHNICAL_OVERVIEW.md)
+- [Backend Setup](backend/README.md)
