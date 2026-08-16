@@ -4,6 +4,8 @@
 
 CoinSight AI is a full-stack application that provides users with a personalized cryptocurrency dashboard. Its daily content is tailored to each user's interests, investor profile, and selected crypto assets.
 
+**Live application:** [Open CoinSight AI](https://monumental-macaron-ceac17.netlify.app/)
+
 ## Registration, Login, and Personalization
 
 The user experience begins with secure registration and login. After signing in for the first time, the user completes a short onboarding process in which they select:

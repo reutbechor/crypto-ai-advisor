@@ -2,6 +2,10 @@
 
 A full-stack personalized crypto dashboard combining live market data, curated news, daily AI insights, and community feedback.
 
+## Live Demo
+
+[Open CoinSight AI](https://monumental-macaron-ceac17.netlify.app/)
+
 ## Tech Stack
 
 - **Frontend:** React, Vite, React Router, JavaScript, CSS
